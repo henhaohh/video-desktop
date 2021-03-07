@@ -1,0 +1,9 @@
+
+        /*拖动*/
+        .dragable {
+            -webkit-app-region: drag;
+        }
+
+        .disdragable {
+            -webkit-app-region: no-drag;
+        }

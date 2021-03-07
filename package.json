@@ -1,0 +1,15 @@
+{
+  "name": "video-desktop",
+  "version": "1.0.0",
+  "description": "",
+  "main": "package.nw/index.js",
+  "scripts": {
+    "dev": "G:\\nwjs\\sdk\\nwjs-sdk-v0.49.0-win-ia32\\nw.exe ./"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "vue": "^2.6.12"
+  }
+}
