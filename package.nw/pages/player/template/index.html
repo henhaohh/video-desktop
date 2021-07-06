@@ -1,0 +1,6 @@
+<div>
+    <iframe v-show="isLocal" ref="iframe" :src="isLocal ? src : 'about:blank'"
+        class="animate__animated animate__fadeIn webview"></iframe>
+    <webview v-show="!isLocal" ref="webview" :src="isLocal ? 'about:blank' : src"
+        class="animate__animated animate__fadeIn webview" />
+</div>

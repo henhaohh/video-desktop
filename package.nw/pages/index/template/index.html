@@ -2,14 +2,14 @@
     <div class="d-flex flex-column justify-content-between dragable">
         <div class="d-flex flex-column justify-content-center">
             <div class="btn">
-                <img src="../images/logo.png" style="width: 2rem;height: 2rem;" />
+                <img src="/package.nw/images/logo.png" style="width: 2rem;height: 2rem;" />
             </div>
             <div class="mt-2 disdragable d-flex flex-column justify-content-center">
                 <div class="btn" @click="sourceType='net'">
                     网络资源
                 </div>
                 <div class="btn" @click="sourceType='local'">
-                    本地资源
+                    用户定义
                 </div>
             </div>
         </div>
@@ -35,10 +35,14 @@
         <div class="container-fluid">
             <template v-if="sourceType==='local'">
                 <div class="animate__animated animate__slideInDown">
-                    <div class="custom-file">
-                        <input type="file" @change="handleFileChange($event)"
-                            accept="video/mp4, video/webm, video/ogg, image/*" class="custom-file-input" id="customFile">
-                        <label class="custom-file-label" for="customFile">Choose file</label>
+                    <div class="input-group mb-3">
+                        <input type="url" @change="handleFileChangeA($event)" class="form-control" placeholder="输入本地或网络文件地址" />
+                        <div class="input-group-append">
+                            <input hidden type="file" @change="handleFileChange($event)"
+                                accept="video/mp4, video/webm, video/ogg, image/*, text/*" class="custom-file-input"
+                                id="customFile">
+                            <label class="btn btn-outline-secondary" type="button" for="customFile">浏览</label>
+                        </div>
                     </div>
                 </div>
             </template>

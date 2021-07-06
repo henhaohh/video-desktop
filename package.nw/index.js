@@ -1,4 +1,4 @@
-nw.Window.open('/package.nw/html/index.html', {
+nw.Window.open('/package.nw/pages/index/index.html', {
     frame: false,
     show: false,
     position: "center",

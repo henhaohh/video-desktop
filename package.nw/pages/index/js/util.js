@@ -25,7 +25,7 @@ function runExec(cmdStr, cmdPath) {
 // 创建播放器窗口
 function createPlayerWindow() {
     return new Promise(resolve => {
-        nw.Window.open('/package.nw/html/player.html', {
+        nw.Window.open('/package.nw/pages/player/index.html', {
             frame: false,
             show: false,
             width: screen.width,
