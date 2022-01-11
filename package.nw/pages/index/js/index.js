@@ -93,7 +93,7 @@ let dllAPI = (() => {
         },
         //获取播放器句柄
         getWindow(title = "") {
-            let command = `video-desktop.exe getPlayer ${title}`
+            let command = `video-desktop.exe getWindow ${title}`
             return runExec(command, bin_path)
         },
         //设置父窗口
@@ -201,18 +201,23 @@ let vm = (() => {
                 }
             }
         },
-        created() {
+        created() {            
+            // 步骤                      
+            // STEP1 创建播放器窗口
             this.createDesktop().then(async () => {
                 this.setVideoSrc(this.defaultVideo.url);
+                // STEP2 获取播放器窗口和底层桌面句柄
                 let [playerHwnd, desktopHwnd] = await Promise.all([
                     this.getPlayerHwnd(),
                     this.getDesktopHwnd()
                 ]);
                 if (playerHwnd && desktopHwnd) {
+                    // STEP3 设置播放器大小为屏幕大小
                     this.$set(this, 'playerHwnd', parseInt(playerHwnd));
                     this.$set(this, 'desktopHwnd', parseInt(desktopHwnd));
                     this.win.moveTo(0, 0);
                     this.win.resizeTo(screen.width, screen.height);
+                    // STEP4将播放器置为底层桌面的子窗口
                     this.setDesktop(playerHwnd, desktopHwnd);
                     this.showDesktop();
                 }
