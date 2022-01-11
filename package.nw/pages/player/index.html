@@ -10,8 +10,14 @@
   <style>
     body {
       margin: 0;
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      -webkit-app-region: drag;
     }
-
+    body *{
+      pointer-events: none;
+    }
     .webview {
       position: absolute;
       left: 0;

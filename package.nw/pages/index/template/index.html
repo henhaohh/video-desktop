@@ -5,10 +5,10 @@
                 <img src="/package.nw/images/logo.png" style="width: 2rem;height: 2rem;" />
             </div>
             <div class="mt-2 disdragable d-flex flex-column justify-content-center">
-                <div class="btn" @click="sourceType='net'">
+                <div class="btn" @click="sourceType='net'" style="word-break: keep-all;">
                     网络资源
                 </div>
-                <div class="btn" @click="sourceType='local'">
+                <div class="btn" @click="sourceType='local'" style="word-break: keep-all;">
                     用户定义
                 </div>
             </div>
@@ -19,11 +19,18 @@
             <div class="btn" @click="closeDesktop()">清除</div>
         </div>
     </div>
-    <div class="flex-fill custom-noscroll bg-light">
-        <div class="sticky-top d-flex justify-content-between dragable">
+    <div class="flex-fill bg-light d-flex flex-column">
+        <div class="d-flex justify-content-between dragable">
             <div class="disdragable">
                 <span class="btn" @click="muted=!muted"><i class="fas"
                         :class="muted?['fa-volume-mute']:['fa-volume-up']"></i></span>
+                <div class="d-inline">
+                    <select class="form-select border-0 bg-transparent" v-model="bgsize">
+                        <option selected value="cover">填充</option>
+                        <option value="fill">拉伸</option>
+                        <option value="contain">适应</option>
+                    </select>
+                </div>
             </div>
             <nav class="nav disdragable">
                 <a class="nav-link text-dark" title="最小化" @click="currentWindow.minimize()"><i
@@ -32,11 +39,12 @@
                         class="fas fa-times"></i></a>
             </nav>
         </div>
-        <div class="container-fluid">
+        <div class="container-fluid container-fluid flex-fill custom-noscroll">
             <template v-if="sourceType==='local'">
-                <div class="animate__animated animate__slideInDown">
+                <div class="animate__animated animate__fadeIn">
                     <div class="input-group mb-3">
-                        <input type="url" @change="handleFileChangeA($event)" class="form-control" placeholder="输入本地或网络文件地址" />
+                        <input type="url" @change="handleFileChangeA($event)" class="form-control"
+                            placeholder="输入本地或网络文件地址" />
                         <div class="input-group-append">
                             <input hidden type="file" @change="handleFileChange($event)"
                                 accept="video/mp4, video/webm, video/ogg, image/*, text/*" class="custom-file-input"
@@ -44,21 +52,56 @@
                             <label class="btn btn-outline-secondary" type="button" for="customFile">浏览</label>
                         </div>
                     </div>
-                </div>
-            </template>
-            <template v-else-if="sourceType==='net'">
-                <div class="animate__animated animate__slideInRight">
-                    <div class="clearfix">
-                        <div class="float-left" :style="{width:`${100/3}%`}" v-for="(item,key) of v_list"
-                            :key="'_'+key">
-                            <div class="p-2 animate__animated animate__zoomIn">
-                                <div class="embed-responsive embed-responsive-1by1">
-                                    <img class="embed-responsive-item" :style="{'object-fit': 'cover'}"
-                                        :src="item.thumbnail" :title="item.title" :alt="item.title"
-                                        @click="defaultVideo=item">
+                    <div class="card mb-2">
+                        <div class="card-header bg-transparent border-0">历史记录</div>
+                        <div class="card-body">
+                            <div class="w-25 d-inline-block" v-for="(item,key) of history" :key="'_'+key">
+                                <div class="p-2 animate__animated animate__zoomIn">
+                                    <div class="embed-responsive embed-responsive-16by9">
+                                        <img class="embed-responsive-item" :style="{'object-fit': 'cover'}"
+                                            :src="item.thumbnail || defaultThumbnail" :title="item.title" :alt="item.title"
+                                            @click="defaultVideo=item">
+                                        <div class="position-absolute"
+                                            style="left: 0; bottom: 0; color: #fff; background-color: rgba(0,0,0,.5); padding: .25rem; font-size: 80%;">
+                                            <i class="fas mr-2" :class="{'fa-images':item.type=='image','fa-video':item.type=='video','fa-file':!['image','video'].includes(item.type)}"></i>{{moment(item.timeStamp).format("YYYY-MM-DD HH:mm:ss")}}</div>
+                                            <div class="position-absolute circle-rounded" @click="history.splice(key,1)"
+                                            style="top: 0;right: 0;color: rgb(255, 255, 255);background-color: rgba(255, 0, 0, 0.5);font-size: 70%;width: 1rem;height: 1rem;text-align: center;line-height: 1rem;">
+                                            <i class="fas fa-times"></i></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </template>
+            <template v-else-if="sourceType==='net'">
+                <div class="animate__animated animate__fadeIn d-flex flex-column">
+                    <div class="w-100 bg-light swiper mySwiper overflow-hidden sticky-top">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide w-auto">
+                                <div class="nav">
+                                    <div class="nav-link" v-for="(item,key) of categorys" :key="key"
+                                        @click="(searchParams.cid=item.id) && (searchParams.start=0)"
+                                        style="word-break: keep-all;">{{item.name}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clearfix flex-fill">
+                        <div class="mb-2">
+                            <div class="w-25 d-inline-block" v-for="(item,key) of v_list" :key="'_'+key">
+                                <div class="p-2 animate__animated animate__zoomIn">
+                                    <div class="embed-responsive embed-responsive-16by9">
+                                        <img class="embed-responsive-item" :style="{'object-fit': 'cover'}"
+                                            :src="item.thumbnail" :title="item.title" :alt="item.title"
+                                            @click="defaultVideo=item">                                           
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="py-2 text-center"><a class="btn text-secondary"
+                                @click="searchParams.start+=searchParams.count">加载更多</a></div>
                     </div>
                 </div>
             </template>

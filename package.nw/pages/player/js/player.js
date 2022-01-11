@@ -68,7 +68,9 @@ let vm = (() => {
               let h = this.contentDocument.head;
               h.appendChild(style);
               [...this.contentDocument.querySelectorAll('video,audio')].forEach(elm => {
-                elm.muted = me.muted
+                elm.muted = me.muted;
+                elm.removeAttribute('controls');
+                elm.setAttribute('loop',-1);
               });
             });
           }
