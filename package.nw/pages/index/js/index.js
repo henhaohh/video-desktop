@@ -1,7 +1,6 @@
 const path = require('path');
 const fs = require('fs');
 const exec = require('child_process').exec;
-const { timeStamp } = require('console');
 /**
  * 有用的工具函数util.js
  */
@@ -49,6 +48,92 @@ function createPlayerWindow() {
 async function getMime(url) {
     const r = await fetch(url, { method: "head" });
     return r.headers.get('content-type');
+}
+// 创建缩略图
+class getThumbnail {
+    constructor(config) {
+        this.cfg = {
+            file: undefined,
+            width: 320,
+            height: 180,
+            videoThumbTime: 1,
+            ...config
+        };
+    }
+    _getType() {
+        let isVideo = false;
+        let isImage = false;
+        let isFile = false;
+        if (typeof this.cfg.file === 'string') {
+            isVideo = /mp4|webv|webm/i.test(path.extname(this.cfg.file));
+            isImage = /jpg|jpeg|bmp|png|gif/i.test(path.extname(this.cfg.file));
+        } else {
+            let type = this.cfg.file.type.split('/')[0].toLowerCase();
+            isVideo = /video/i.test(type);
+            isImage = /image/i.test(type);
+            isFile = true;
+        }
+        return isVideo ? {
+            type: 'video',
+            src: isFile ? URL.createObjectURL(this.cfg.file) : this.cfg.file
+        } : (isImage ? {
+            type: 'image',
+            src: isFile ? URL.createObjectURL(this.cfg.file) : this.cfg.file
+        } : false)
+    }
+    _init() {
+        let type = this._getType();
+        if (!type) return Promise.reject(false);
+        if (type.type === 'image') {
+            return this._drwaimg(type.src);
+        }
+        if (type.type === 'video') {
+            return this._drwavideo(type.src);
+        }
+    }
+    _drwaimg(src) {
+        let c = document.createElement('canvas');
+        let ctx = c.getContext("2d");
+        c.width = this.cfg.width;
+        c.height = this.cfg.height;
+        let elm = new Image;
+        elm.src = src;
+        return new Promise((resolve, reject) => {
+            elm.addEventListener('load', () => {
+                ctx.drawImage(elm, 0, 0, c.width, c.height);
+                resolve(c.toDataURL('png', 0.7));
+                c = ctx = null;
+            });
+            elm.addEventListener('error', (e) => {
+                reject(e);
+                c = ctx = null;
+            })
+        });
+    }
+    _drwavideo(src) {
+        let c = document.createElement('canvas');
+        let ctx = c.getContext("2d");
+        c.width = this.cfg.width;
+        c.height = this.cfg.height;
+        let elm = document.createElement('video');
+        elm.muted = true;
+        elm.src = src;
+        elm.currentTime = this.cfg.videoThumbTime;
+        return new Promise((resolve, reject) => {
+            elm.addEventListener('canplay', () => {
+                setTimeout(() => {
+                    ctx.drawImage(elm, 0, 0, c.width, c.height);
+                    resolve(c.toDataURL('png', 0.7));
+                    c = ctx = null;
+                });
+
+            });
+            elm.addEventListener('error', (e) => {
+                reject(e);
+                c = ctx = null;
+            })
+        });
+    }
 }
 /**
  * 用到的api
@@ -201,7 +286,7 @@ let vm = (() => {
                 }
             }
         },
-        created() {            
+        created() {
             // 步骤                      
             // STEP1 创建播放器窗口
             this.createDesktop().then(async () => {
@@ -310,11 +395,22 @@ let vm = (() => {
             },
             // 文件改变事件
             handleFileChange(e) {
-                this.defaultVideo = {
-                    title: e.target.files[0].name,
-                    url: e.target.files[0].path,
-                    type: e.target.files[0].type.split('/')[0].toLowerCase(),
-                    thumbnail: ''
+                let sthumb = (t='') =>{
+                    this.defaultVideo = {
+                        title: e.target.files[0].name,
+                        url: e.target.files[0].path,
+                        type: e.target.files[0].type.split('/')[0].toLowerCase(),
+                        thumbnail: t
+                    }
+                }
+                if (['image', 'video'].includes(e.target.files[0].type.split('/')[0].toLowerCase())) {
+                    new getThumbnail({ file: e.target.files[0] })._init().then(r => {
+                        sthumb(r)
+                    }).catch(e => {
+                        sthumb()
+                    })                    
+                }else{
+                    sthumb()
                 }
             },
             // 退出
