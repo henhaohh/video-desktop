@@ -17,11 +17,26 @@ let vm = (() => {
       },
       muted(v) {
         this.webview && this.webview.setAudioMuted(v);
+        if(this.iframe){
+          [...this.iframe.contentDocument.querySelectorAll('video,audio')].forEach(elm => {
+            elm.muted = v;
+          });
+        }
       },
       backgroundSize(v) {
-        this.webview && this.webview.insertCSS({
+        this.webview && /*this.webview.insertCSS({
           code: `body>video,body>img,body>iframe {position: absolute;left: 0;width: 100%;top: 0;height: 100%;display: block;object-fit: ${v || 'cover'};}`
-        })
+        })*/
+        this.webview.executeScript({
+          code: `let elm = document.querySelectorAll('video,img');
+            [...elm].forEach(v=>{
+              v.style['object-fit'] = ${v || 'cover'}
+            });`});
+        if(this.iframe){
+          [...this.iframe.contentDocument.querySelectorAll('video,img')].forEach(el=>{
+            el.style['object-fit'] = v || 'cover'
+          });
+        }
       }
     },
     computed: {
